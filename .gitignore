@@ -7,3 +7,7 @@ __pycache__/
 # Past LinkedIn puzzles copied from third-party sites stay local.
 tango/puzzles/linkedin/
 queens/puzzles/linkedin/
+
+# Generated puzzle files stay local too.
+tango/puzzles/generated/
+queens/puzzles/generated/

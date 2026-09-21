@@ -1,0 +1,12 @@
+# source: Single-path puzzle. At 13 of 19 steps only one cell can be worked out, and 15 of the deductions need a whole row or column.
+. . . M . .
+  x
+.x. . . . .
+
+M . . . .x.
+
+. . .x. M .
+          x
+.=. . . . .
+
+. . . .xS M

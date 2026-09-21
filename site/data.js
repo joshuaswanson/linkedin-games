@@ -1,0 +1,1 @@
+window.PUZZLE_DATA = {"puzzles":[]};

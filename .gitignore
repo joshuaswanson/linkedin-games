@@ -1,0 +1,9 @@
+.claude/
+__pycache__/
+.pytest_cache/
+*.pyc
+.DS_Store
+
+# Past LinkedIn puzzles copied from third-party sites stay local.
+tango/puzzles/linkedin/
+queens/puzzles/linkedin/

@@ -1,0 +1,12 @@
+# source: Medium puzzle. 8 of the deductions need a whole row or column.
+. S S . . .
+
+. . MxSx. .
+      x
+. . S . . S
+          x
+M .x. . . .
+
+Sx. .=. . .
+
+M . .=M S .

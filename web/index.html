@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tango Generator</title>
+<!-- STYLES -->
+</head>
+<body>
+<header>
+  <h1 id="heading">Tango Generator</h1>
+  <div class="seg games" id="games"></div>
+  <span class="sub" id="title"></span>
+</header>
+<main>
+  <aside class="list-col">
+    <div class="gen">
+      <div class="level"><span>Difficulty</span><input type="range" id="gen-level" min="1" max="5" value="3"><b id="gen-level-label">Hard</b></div>
+      <button id="gen-new" class="primary">New puzzle</button>
+    </div>
+    <div class="list" id="list"></div>
+  </aside>
+  <div class="board-wrap" id="board-wrap">
+    <div class="board-outer"><div class="board" id="board"></div></div>
+    <div class="controls">
+      <button id="undo">Undo</button>
+      <button id="clear">Clear board</button>
+      <span id="play-opts"></span>
+    </div>
+    <div class="hint" id="play-hint"></div>
+  </div>
+  <div class="side">
+    <section class="panel">
+      <h2>Play</h2>
+      <div class="timer" id="timer">0:00</div>
+      <p class="status" id="status"></p>
+      <ul class="rules" id="rules"></ul>
+    </section>
+    <section class="panel">
+      <h2>Next move</h2>
+      <div class="hint-bar">
+        <button id="reveal" class="primary" title="Show or hide the next deduction from the board as it is now (H)">Reveal next move</button>
+        <button id="apply" title="Fill it in (Enter)" disabled>Apply</button>
+      </div>
+      <p class="explain" id="explain"></p>
+      <div class="comps" id="comps"></div>
+    </section>
+  </div>
+</main>
+<!-- SCRIPTS -->
+</body>
+</html>

@@ -1,0 +1,12 @@
+# source: Easy puzzle. 3 of the deductions need a whole row or column.
+. . . . M .
+
+M . MxS . S
+
+S . . MxS M
+      =
+. S . M . S
+          x
+S . S . . .
+        x
+. M M . . .

@@ -1,0 +1,12 @@
+# source: Hard puzzle. 20 of the deductions need a whole row or column.
+. . . . .=.
+
+. . . . . M
+
+.=. . . . .
+    =
+. . S=. . .
+
+. . . S=. .
+
+. . . . M .

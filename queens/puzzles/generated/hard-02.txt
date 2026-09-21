@@ -1,0 +1,10 @@
+# source: Hard 8x8 puzzle, difficulty 46 (LinkedIn's past 8x8 puzzles run 0 to about 60).
+# colors: E=#B3DFA0 A=#BBA3E2 B=#96BEFF C=#FFC992 D=#DFDFDF F=#B9B29E G=#FF7B60 H=#E6F388
+EEABBBBB
+EEABBBBB
+EAACBBDB
+EECCEBDB
+EEEEEEDD
+FFFFEGGD
+FHHHEGGD
+FHHEEEGG

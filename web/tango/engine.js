@@ -16,6 +16,7 @@ class Tango {
       for (let c = 0; c < N; c++) {
         const cell = el('div', 'cell' + (c === N - 1 ? ' last-col' : '') + (r === N - 1 ? ' last-row' : ''));
         if (T.givens[r][c]) cell.classList.add('given');
+        cell.dataset.r = r; cell.dataset.c = c;
         cell.addEventListener('click', () => onClick(r, c));
         board.appendChild(cell);
         this.cells[r].push(cell);

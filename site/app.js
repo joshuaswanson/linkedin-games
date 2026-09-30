@@ -1,6 +1,7 @@
 // Page shell: puzzle list, play loop, hints, persistence and generation requests.
 let game = GAMES[0], puzzle = null, engine = null, hint = null;
 let undoStack = [], startedAt = null, elapsedMs = 0, tickId = null, solved = false;
+let drag = null, suppressClick = false;
 const board = $('board'), explain = $('explain'), comps = $('comps'), timerEl = $('timer'), statusEl = $('status');
 
 document.body.classList.toggle('one-game', GAMES.length === 1);
@@ -117,8 +118,8 @@ function selectPuzzle(p) {
 
 function render(popCell) {
   const bad = engine.violations();
-  engine.render(bad, popCell, hint);
-  if (!solved && engine.isComplete() && bad.size === 0) { solved = true; stopTimer(); hint = null; engine.render(bad, popCell, null); }
+  engine.render(bad, popCell, hint, drag);
+  if (!solved && engine.isComplete() && bad.size === 0) { solved = true; stopTimer(); hint = null; engine.render(bad, popCell, null, null); }
   board.classList.toggle('solved', solved);
   statusEl.classList.toggle('ok', solved);
   statusEl.textContent = solved ? `Solved in ${fmtTime(elapsedMs)}.` : engine.status(bad, startedAt !== null);
@@ -134,13 +135,61 @@ function render(popCell) {
 }
 function change(popCell) { hint = null; render(popCell); }
 function onCellClick(r, c) {
-  if (solved || engine.isGiven(r, c)) return;
+  if (suppressClick) { suppressClick = false; return; }
+  playCell(r, c);
+}
+function playCell(r, c) {
+  if (!engine || solved || engine.isGiven(r, c)) return;
   const before = engine.marks.map(row => row.slice());
   if (!engine.click(r, c)) return;
   if (startedAt === null || startedAt === 'paused') startTimer();
   undoStack.push(before);
   change([r, c]);
 }
+function cellUnder(ev) {
+  const hit = document.elementFromPoint(ev.clientX, ev.clientY);
+  const cell = hit && hit.closest && hit.closest('.cell');
+  if (!cell || !board.contains(cell) || cell.dataset.r === undefined) return null;
+  return [+cell.dataset.r, +cell.dataset.c];
+}
+board.addEventListener('pointerdown', ev => {
+  suppressClick = false;
+  if (!engine || solved || !engine.dragMode || ev.button !== 0) return;
+  const at = cellUnder(ev);
+  if (!at) return;
+  const mode = engine.dragMode(...at);
+  if (!mode) return;
+  drag = { anchor: at, current: at, mode, moved: false };
+  board.setPointerCapture(ev.pointerId);
+  ev.preventDefault();
+});
+board.addEventListener('pointermove', ev => {
+  if (!drag) return;
+  const at = cellUnder(ev);
+  if (!at || (at[0] === drag.current[0] && at[1] === drag.current[1])) return;
+  drag.current = at;
+  drag.moved = true;
+  render();
+});
+function endDrag(commit) {
+  if (!drag) return;
+  const d = drag;
+  drag = null;
+  // Capturing the pointer sends the follow-up click to the board rather than
+  // the cell, so the press is resolved here and any click is ignored.
+  suppressClick = true;
+  setTimeout(() => { suppressClick = false; }, 0);
+  if (!commit) { render(); return; }
+  if (!d.moved) { playCell(...d.anchor); return; }
+  const before = engine.marks.map(row => row.slice());
+  if (!engine.applyDrag(d.anchor, d.current, d.mode)) { render(); return; }
+  if (startedAt === null || startedAt === 'paused') startTimer();
+  undoStack.push(before);
+  change(d.current);
+}
+board.addEventListener('pointerup', () => endDrag(true));
+board.addEventListener('pointercancel', () => endDrag(false));
+
 function undoMove() {
   if (!engine || solved || !undoStack.length) return;
   engine.marks = undoStack.pop();

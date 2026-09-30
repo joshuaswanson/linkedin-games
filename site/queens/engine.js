@@ -19,6 +19,7 @@ class Queens {
       for (let c = 0; c < N; c++) {
         const cell = el('div', 'cell');
         cell.style.background = this.colorOf(regions[r][c]);
+        cell.dataset.r = r; cell.dataset.c = c;
         cell.addEventListener('click', () => onClick(r, c));
         board.appendChild(cell);
         this.cells[r].push(cell);
@@ -47,7 +48,7 @@ class Queens {
     this.marks = this.emptyMarks();
   }
   rules() { return '<li>Place exactly one queen in each row, each column and each colour region.</li><li>Two queens cannot touch, not even diagonally.</li><li>Use X to mark cells where a queen cannot go.</li>'; }
-  playHint() { return 'Click a cell to cycle X, queen, empty. <kbd>&#8984;Z</kbd> undoes, <kbd>H</kbd> reveals the next move, <kbd>Enter</kbd> applies it.'; }
+  playHint() { return 'Click a cell to cycle X, queen, empty. Drag to fill a row, column or block with X, or drag from an X to clear. <kbd>&#8984;Z</kbd> undoes, <kbd>H</kbd> reveals the next move, <kbd>Enter</kbd> applies it.'; }
   playOptions() { return '<label class="opt"><input type="checkbox" id="autox" checked> Auto-fill X around queens</label>'; }
   emptyMarks() { return Array.from({ length: this.n }, () => Array(this.n).fill('')); }
   isGiven() { return false; }
@@ -59,6 +60,25 @@ class Queens {
     for (let rr = 0; rr < N; rr++) for (let cc = 0; cc < N; cc++) if (regions[rr][cc] === regions[r][c]) strike.add(key(rr, cc, N));
     for (const [rr, cc] of this.puzzle.neighbours([r, c])) strike.add(key(rr, cc, N));
     for (const k of strike) { const rr = Math.floor(k / N), cc = k % N; if ((rr !== r || cc !== c) && this.marks[rr][cc] === '') this.marks[rr][cc] = 'X'; }
+  }
+  // Dragging paints the rectangle between the cell pressed and the cell under
+  // the pointer: X onto empty cells, or off again if the drag started on an X.
+  dragMode(r, c) {
+    const m = this.marks[r][c];
+    return m === 'Q' ? null : m === 'X' ? 'erase' : 'fill';
+  }
+  dragCells([r0, c0], [r1, c1]) {
+    const out = [];
+    for (let r = Math.min(r0, r1); r <= Math.max(r0, r1); r++) for (let c = Math.min(c0, c1); c <= Math.max(c0, c1); c++) out.push([r, c]);
+    return out;
+  }
+  applyDrag(anchor, current, mode) {
+    let changed = false;
+    for (const [r, c] of this.dragCells(anchor, current)) {
+      if (mode === 'fill' && this.marks[r][c] === '') { this.marks[r][c] = 'X'; changed = true; }
+      else if (mode === 'erase' && this.marks[r][c] === 'X') { this.marks[r][c] = ''; changed = true; }
+    }
+    return changed;
   }
   click(r, c) {
     const cur = this.marks[r][c];
@@ -91,18 +111,22 @@ class Queens {
     return out;
   }
   setCell(cell, mark) { cell.innerHTML = mark === 'Q' ? CROWN : mark === 'X' ? `<span class="x">${XMARK}</span>` : ''; }
-  render(bad, popCell, hint) {
+  render(bad, popCell, hint, drag) {
     const N = this.n;
     const targets = new Set(hint && hint.cells ? hint.cells.map(([r, c]) => key(r, c, N)) : []);
     const causes = new Set(hint && hint.cause ? hint.cause.map(([r, c]) => key(r, c, N)) : []);
     const mistake = hint && hint.mistake ? key(...hint.cell, N) : -1;
+    const selected = new Set(drag ? this.dragCells(drag.anchor, drag.current).map(([r, c]) => key(r, c, N)) : []);
     for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
       const cell = this.cells[r][c], k = key(r, c, N);
       const ghost = targets.has(k) && !this.marks[r][c];
-      this.setCell(cell, ghost ? (hint.kind === 'queen' ? 'Q' : 'X') : this.marks[r][c]);
+      const painting = selected.has(k) && drag.mode === 'fill' && this.marks[r][c] === '';
+      const erasing = selected.has(k) && drag.mode === 'erase' && this.marks[r][c] === 'X';
+      this.setCell(cell, ghost ? (hint.kind === 'queen' ? 'Q' : 'X') : painting ? 'X' : this.marks[r][c]);
       cell.classList.remove('tint', 'current');
       cell.classList.toggle('target', targets.has(k));
-      cell.classList.toggle('ghost', ghost);
+      cell.classList.toggle('ghost', ghost || painting || erasing);
+      cell.classList.toggle('sel', selected.has(k));
       cell.classList.toggle('cause', causes.has(k) && !targets.has(k));
       cell.classList.toggle('err', bad.has(k) || k === mistake);
       cell.classList.toggle('pop', !!popCell && popCell[0] === r && popCell[1] === c);
